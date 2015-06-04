@@ -22,7 +22,10 @@ var fs = require('fs')
  http://thedailyshow.cc.com/full-episodes/okco56/may-13--2015---reza-aslan
  http://thedailyshow.cc.com/full-episodes/slnsr3/may-12--2015---tom-brokaw
  http://thedailyshow.cc.com/full-episodes/f2nr6x/may-11--2015---john-legend
+ 
+ http://thedailyshow.cc.com/episodes/rvkbud/june-2--2015---bill-de-blasio
 
+ http://thedailyshow.cc.com/episodes/l77wjf/june-1--2015---stanley-mcchrystal
 */
 
 /*
@@ -49,6 +52,7 @@ vhttp-3500
 var url = ""
 
 url = "http://thedailyshow.cc.com/full-episodes/okco56/may-13--2015---reza-aslan"
+//url = "http://thedailyshow.cc.com/episodes/l77wjf/june-1--2015---stanley-mcchrystal"
 
 /*
 if(process.argv.length < 3) {
@@ -69,6 +73,8 @@ url = process.argv[2]
 
 var options;
 youtubedl.getInfo(url, options, function(err, info) {
+	// Disable this function
+	return
 	if (err) throw err;
 
 	var title = info[0].playlist_title
@@ -169,12 +175,38 @@ youtubedl.getInfo(url, options, function(err, info) {
 });
 
 console.log("---")
+console.log("Trying to download")
 
 ///
 // From official example:
 // https://github.com/fent/node-youtube-dl
+/*
+var video = youtubedl(url, null, null)
+
+video.on('info', function(info) {
+  console.log('Download started');
+  console.log('filename: ' + info.filename);
+  console.log('size: ' + info.size);
+  console.log(JSON.stringify(info))
+});
+
+video.pipe(fs.createWriteStream('myvideo.mp4'));
+*/
+
+// THis works:
 
 var video = youtubedl(url, null, null)
+
+/*
+var video = youtubedl(url, null, function(err, info) {
+	if (err) throw err;
+
+	console.log("Downloading...")
+
+	var title = info[0].playlist_title
+	var description = info[0].description
+})
+*/
 
 var size = 0;
 video.on('info', function(info) {
