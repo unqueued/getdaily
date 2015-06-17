@@ -5,6 +5,12 @@ var async = require('async')
 var fs = require('fs')
 
 // References:
+
+// This looks very helpful for how to save video files using pipe stream etc.
+// http://stackoverflow.com/questions/28016289/saving-video-files-using-node-youtube-dl-with-meteorjs
+
+// Goal: Use pipe and stream. That is best way.
+
 // https://ricochen.wordpress.com/2010/04/24/javascript-zero-padding-numbers/
 // How to do month as always two digits with left zero padded:
 // new String('0' + upload_date.getMonth()).slice(-2)
@@ -63,6 +69,14 @@ if(process.argv.length < 3) {
 url = process.argv[2]
 */
 
+// HOw to call the binary directly:
+/*
+ytdl.exec(url, ['-x', '--audio-format', 'mp3'], {}, function(err, output) {
+  if (err) throw err;
+  console.log(output.join('\n'));
+});
+*/
+
 
 //console.log(JSON.stringify(process.argv))
 //console.log(__filename)
@@ -75,6 +89,7 @@ var options;
 youtubedl.getInfo(url, options, function(err, info) {
 	// Disable this function
 	return
+
 	if (err) throw err;
 
 	var title = info[0].playlist_title
@@ -208,6 +223,7 @@ var video = youtubedl(url, null, function(err, info) {
 })
 */
 
+// Another attempt:
 var size = 0;
 video.on('info', function(info) {
 	size = info.size;
@@ -230,6 +246,43 @@ video.on('data', function(data) {
 		process.stdout.clearLine(1);
 		process.stdout.write(percent + '%');
 	}
+});
+
+video.on('end', function(data) {
+	console.log("Download completed")
+});
+
+return
+
+// Perhaps... just specify the format in the options?
+// There's not reason to dwell on this
+
+var size = 0;
+video.on('info', function(info) {
+	size = info.size;
+	console.log('Download started');
+	console.log('filename: ' + info._filename);
+	console.log('size: ' + info.size);
+
+	var output = info._filename
+	console.log(output)
+	video.pipe(fs.createWriteStream(output));
+});
+
+var pos = 0;
+video.on('data', function(data) {
+	pos += data.length;
+	// `size` should not be 0 here.
+	if (size) {
+		var percent = (pos / size * 100).toFixed(2);
+		process.stdout.cursorTo(0);
+		process.stdout.clearLine(1);
+		process.stdout.write(percent + '%');
+	}
+});
+
+video.on('end', function(data) {
+	console.log("Download completed")
 });
 
 ///
