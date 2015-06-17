@@ -117,43 +117,6 @@ function downloadAllActs() {
 	})
 }
 
-function downloadActTemp() {
-	console.log("hi")
-}
-
-function downloadAct(info) {
-	var video = youtubedl(url, null, null)
-
-	// Another attempt:
-	var size = 0;
-	video.on('info', function(info) {
-		size = info.size;
-		console.log('Download started');
-		console.log('filename: ' + info._filename);
-		console.log('size: ' + info.size);
-
-		var output = info._filename
-		//console.log(output)
-		video.pipe(fs.createWriteStream(output));
-	});
-
-	var pos = 0;
-	video.on('data', function(data) {
-		pos += data.length;
-		// `size` should not be 0 here.
-		if (size) {
-			var percent = (pos / size * 100).toFixed(2);
-			process.stdout.cursorTo(0);
-			process.stdout.clearLine(1);
-			process.stdout.write(percent + '%');
-		}
-	});
-
-	video.on('end', function(data) {
-		console.log("Download completed")
-	});
-}
-
 function getFormats(format) {
 	var video = youtubedl(url, null, function(err, info) {
 		if (err) throw err;
