@@ -69,42 +69,47 @@ function downloadAllActs() {
 					return true
 				})
 
+				console.log()
+				console.log("" + filename + " exists: " + fs.existsSync(filename))
+				console.log()
 
-
-
-				var videoDownload = youtubedl(url, null, null)
-
-
-				var size = 0;
-				videoDownload.on('info', function(info) {
-					size = info.size;
-					console.log('Download started');
-					//console.log('filename: ' + info._filename);
-					console.log('filename: ' + filename);
-					console.log('size: ' + info.size);
-
-					var output = filename
-					console.log("Downloading to " + filename)
-					//console.log(output)
-					videoDownload.pipe(fs.createWriteStream(output));
-				})
-
-				var pos = 0;
-				videoDownload.on('data', function(data) {
-					pos += data.length;
-					// `size` should not be 0 here.
-					if (size) {
-						var percent = (pos / size * 100).toFixed(2);
-						process.stdout.cursorTo(0);
-						process.stdout.clearLine(1);
-						process.stdout.write(percent + '%');
-					}
-				});
-
-				videoDownload.on('end', function(data) {
-					console.log("Download completed, doing callback()")
+				if(fs.existsSync(filename)) {
+					console.log("File already exists, skipping")
 					callback()
-				});
+				} else {
+					var videoDownload = youtubedl(url, null, null)
+
+					var size = 0;
+					videoDownload.on('info', function(info) {
+						size = info.size
+						console.log('Download started')
+						//console.log('filename: ' + info._filename)
+						console.log('filename: ' + filename)
+						console.log('size: ' + info.size)
+
+						var output = filename
+						console.log("Downloading to " + filename)
+						//console.log(output)
+						videoDownload.pipe(fs.createWriteStream(output))
+					})
+
+					var pos = 0;
+					videoDownload.on('data', function(data) {
+						pos += data.length
+						// `size` should not be 0 here.
+						if (size) {
+							var percent = (pos / size * 100).toFixed(2)
+							process.stdout.cursorTo(0)
+							process.stdout.clearLine(1)
+							process.stdout.write(percent + '%')
+						}
+					})
+
+					videoDownload.on('end', function(data) {
+						console.log("Download completed, doing callback()")
+						callback()
+					});
+				}
 
 
 
