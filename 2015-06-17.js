@@ -6,6 +6,9 @@ var fs = require('fs')
 
 var url = "http://thedailyshow.cc.com/full-episodes/8mfir8/june-16--2015---aziz-ansari"
 
+// Download queue
+var queue = []
+
 /*
 Formats:
 rtmp-1300
@@ -36,64 +39,153 @@ function parseUploadDate(dateString) {
 
 var format = "vhttp-200"
 
-console.log("Execing")
+console.log("About to get")
 
-var video = youtubedl(url, null, function(err, info) {
-	if (err) throw err;
-	//console.log(info)
-	console.log("inside init callback")
+//getFormats(format)
 
-	async.eachSeries(
-		info,
-		function(item, callback) {
-			var url
-			console.log()
-			console.log("---")
+downloadAllActs()
 
-			//console.log("Playlist item: " + item.playlist_index)
+function downloadAllActs() {
+	var video = youtubedl(url, null, function(err, info) {
+		if (err) throw err;
+		async.eachSeries(
+			info,
+			function(item, callback) {
+				var url
+				var filename = item.upload_date + "_" + item.playlist_index + "." + item.ext
 
-			//console.log(item.playlist_index)
-			//console.log(item)
-			//console.log("Video to download:")
-			//console.log(JSON.stringify(item))
+				console.log("---")
+				console.log()
 
-			//console.log("Attempting to find urls of " + format + " format:")
+				console.log("Downloading playlist index: " + item.playlist_index)
+				console.log("To filename: " + filename)
 
-
-			item.formats.every(function(element, index, array) {
-				//console.log()
-				//console.log("Element:")
-				//console.log()
-				//console.log(element)
-				//console.log()
-				//console.log("Format: " + element.format)
-				//console.log("Format_id: " + element.format_id)
-				//console.log(element.url)
-				
-				//console.log(element)
-				
-				/*
-				element.format_id.every(function(element, index, array) {
-					console.log("Format:")
-					console.log(element)
+				item.formats.every(function(element, index, array) {
+					if(element.format_id == format) {
+						url = element.url
+						console.log("URL for " + format + ": " + element.url)
+						return false
+					}
+					return true
 				})
-				*/
-				
 
-				if(element.format_id == format) {
-				//	console.log()
-				//	console.log(element.url)
-					console.log("URL for " + format + ": " + element.url)
-					return false
-				}
-				return true
-			})
-			callback()
-		},
-		function(err) {
-			//console.log("Finished extracting urls")
+
+
+
+				var videoDownload = youtubedl(url, null, null)
+
+
+				var size = 0;
+				videoDownload.on('info', function(info) {
+					size = info.size;
+					console.log('Download started');
+					//console.log('filename: ' + info._filename);
+					console.log('filename: ' + filename);
+					console.log('size: ' + info.size);
+
+					var output = filename
+					console.log("Downloading to " + filename)
+					//console.log(output)
+					videoDownload.pipe(fs.createWriteStream(output));
+				})
+
+				var pos = 0;
+				videoDownload.on('data', function(data) {
+					pos += data.length;
+					// `size` should not be 0 here.
+					if (size) {
+						var percent = (pos / size * 100).toFixed(2);
+						process.stdout.cursorTo(0);
+						process.stdout.clearLine(1);
+						process.stdout.write(percent + '%');
+					}
+				});
+
+				videoDownload.on('end', function(data) {
+					console.log("Download completed, doing callback()")
+					callback()
+				});
+
+
+
+				//callback()
+			},
+			function(err) {
+				console.log("Finished extracting urls")
+			}
+		)
+	})
+}
+
+function downloadActTemp() {
+	console.log("hi")
+}
+
+function downloadAct(info) {
+	var video = youtubedl(url, null, null)
+
+	// Another attempt:
+	var size = 0;
+	video.on('info', function(info) {
+		size = info.size;
+		console.log('Download started');
+		console.log('filename: ' + info._filename);
+		console.log('size: ' + info.size);
+
+		var output = info._filename
+		//console.log(output)
+		video.pipe(fs.createWriteStream(output));
+	});
+
+	var pos = 0;
+	video.on('data', function(data) {
+		pos += data.length;
+		// `size` should not be 0 here.
+		if (size) {
+			var percent = (pos / size * 100).toFixed(2);
+			process.stdout.cursorTo(0);
+			process.stdout.clearLine(1);
+			process.stdout.write(percent + '%');
 		}
-	)
-})
+	});
 
-console.log("finished execing")
+	video.on('end', function(data) {
+		console.log("Download completed")
+	});
+}
+
+function getFormats(format) {
+	var video = youtubedl(url, null, function(err, info) {
+		if (err) throw err;
+
+		//console.log("---")
+		//console.log(info[0].upload_date)
+		//console.log("---")
+		//console.log("For episode date:" + info[0] )
+
+		async.eachSeries(
+			info,
+			function(item, callback) {
+				var url
+
+				//queue[item.playlist_index] = []
+
+				console.log()
+				console.log("---")
+				console.log("Playlist item: " + item.playlist_index)
+
+				item.formats.every(function(element, index, array) {
+					if(element.format_id == format) {
+						console.log("URL for " + format + ": " + element.url)
+						return false
+					}
+					return true
+				})
+				callback()
+			},
+			function(err) {
+				console.log("Finished extracting urls")
+			}
+		)
+	})
+}
