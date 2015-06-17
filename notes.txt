@@ -7,3 +7,28 @@ Can probably be manuvered around.
 
 rtmpe probably requires the swf file and the html page that embedded it.
 Should try http whenever possible.
+
+
+FFMPEG is stupid easy
+http://stackoverflow.com/questions/15186500/howto-merge-two-avi-files-using-ffmpeg
+http://stackoverflow.com/questions/7333232/concatenate-two-mp4-files-using-ffmpeg
+
+This contains info on how to concatenate:
+https://github.com/fluent-ffmpeg/node-fluent-ffmpeg
+
+---
+mergeToFile(filename, tmpdir): concatenate multiple inputs
+
+Use the input and mergeToFile methods on a command to concatenate multiple inputs to a single output file. The mergeToFile needs a temporary folder as its second argument.
+
+ffmpeg('/path/to/part1.avi')
+  .input('/path/to/part2.avi')
+  .input('/path/to/part2.avi')
+  .on('error', function(err) {
+    console.log('An error occurred: ' + err.message);
+  })
+  .on('end', function() {
+    console.log('Merging finished !');
+  })
+  .mergeToFile('/path/to/merged.avi', '/path/to/tempDir');
+---
