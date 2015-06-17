@@ -89,7 +89,6 @@ function downloadAllActs() {
 
 						var output = filename
 						console.log("Downloading to " + filename)
-						//console.log(output)
 						videoDownload.pipe(fs.createWriteStream(output))
 					})
 
@@ -106,16 +105,15 @@ function downloadAllActs() {
 					})
 
 					videoDownload.on('end', function(data) {
+						console.log()
 						console.log("Download completed, doing callback()")
 						callback()
-					});
+					})
 				}
 
-
-
-				//callback()
 			},
 			function(err) {
+				console.log()
 				console.log("Finished extracting urls")
 			}
 		)
@@ -135,7 +133,7 @@ function getFormats(format) {
 			info,
 			function(item, callback) {
 				var url
-
+				
 				//queue[item.playlist_index] = []
 
 				console.log()
