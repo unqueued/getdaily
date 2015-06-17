@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# Step 1:
+# Change months
+
+rename -v 's/september/09/' *
+rename -v 's/october/10/' *
+rename -v 's/november/11/' *
+rename -v 's/december/12/' *
+rename -v 's/january/01/' *
+rename -v 's/february/02/' *
+rename -v 's/march/03/' *
+rename -v 's/april/04/' *
+rename -v 's/may/05/' *
+rename -v 's/june/06/' *
+rename -v 's/july/07/' *
+rename -v 's/august/08/' *
+
+#Step 2:
+Remove excessive --:
+rename -v 's/--/-/' *
+
+#Step 3:
+#Bring year front:
+rename -v 's/(\d{2})-(\d{1,2})-(\d{4})/$3-$1-$2/' *
+
+#Step 4:
+#Bring datestamp to the front:
+rename -v 's/^(.*)(\d{4}-\d{2}-\d{2})/$2_$1/' *
+
+rename -v 's/(\d{4})-(\d{2})-(\d{1})_/$1-$2-0$3_/' *

@@ -1,0 +1,9 @@
+
+
+using exec() has unpredictable results
+
+Using a non-current full episode has it return different formats for each act
+Can probably be manuvered around.
+
+rtmpe probably requires the swf file and the html page that embedded it.
+Should try http whenever possible.
