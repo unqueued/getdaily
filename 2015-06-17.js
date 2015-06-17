@@ -115,9 +115,61 @@ function downloadAllActs() {
 			function(err) {
 				console.log()
 				console.log("Finished extracting urls")
+
+				concatVideo(info)
 			}
 		)
 	})
+}
+
+function concatVideo(info) {
+	var ffmpeg = require('fluent-ffmpeg')
+	var command = ffmpeg()
+
+
+	async.eachSeries(
+		info,
+		function(item, callback) {
+			var filename = item.upload_date + "_" + item.playlist_index + "." + item.ext
+			
+			console.log()
+			console.log("Adding filename: " + filename)
+			console.log()
+
+			ffmpeg().input(filename)
+
+			callback()
+		},
+		function(err) {
+			console.log("Finished adding files")
+			
+			ffmpeg().on('error', function(err) {
+				console.log('An error occurred: ' + err.message)
+			})
+
+			ffmpeg().on('end', function() {
+				console.log("Merging finished")
+			})
+
+			console.log("About to merge files")
+
+			ffmpeg().mergeToFile(info[0].upload_date, "/tmp")
+		}
+	)
+
+	/*
+ffmpeg('/path/to/part1.avi')
+  .input('/path/to/part2.avi')
+  .input('/path/to/part2.avi')
+  .on('error', function(err) {
+    console.log('An error occurred: ' + err.message);
+  })
+  .on('end', function() {
+    console.log('Merging finished !');
+  })
+  .mergeToFile('/path/to/merged.avi', '/path/to/tempDir');
+  */
+
 }
 
 function getFormats(format) {
@@ -133,7 +185,7 @@ function getFormats(format) {
 			info,
 			function(item, callback) {
 				var url
-				
+
 				//queue[item.playlist_index] = []
 
 				console.log()
