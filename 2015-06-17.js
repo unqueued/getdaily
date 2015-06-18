@@ -12,7 +12,8 @@ var youtubedl = require('youtube-dl');
 var async = require('async')
 var fs = require('fs')
 
-var url = "http://thedailyshow.cc.com/full-episodes/8mfir8/june-16--2015---aziz-ansari"
+//var url = "http://thedailyshow.cc.com/full-episodes/8mfir8/june-16--2015---aziz-ansari"
+var url = "http://thedailyshow.cc.com/full-episodes/nkl263/june-17--2015---bill-clinton"
 
 // Download queue
 var queue = []
