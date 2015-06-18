@@ -40,3 +40,18 @@ So, rebuilding with this:
 brew install ffmpeg --with-fdk-aac --with-ffplay --with-freetype --with-frei0r --with-libass --with-libvo-aacenc --with-libvorbis --with-libvpx --with-opencore-amr --with-openjpeg --with-opus --with-rtmpdump --with-schroedinger --with-speex --with-theora --with-tools
 
 
+---
+Issue:
+i don't think it's really concatentating, I think it's just completely re-encoding.
+Which is bad.
+
+Apparently, I have to be using the concat filter, but fluent ffmpeg doesn't support that:
+https://github.com/fluent-ffmpeg/node-fluent-ffmpeg/issues/376
+
+The proper and fast way to concat:
+https://trac.ffmpeg.org/wiki/Concatenate
+
+Yes!
+This works: ffmpeg -f concat -i <(for f in ./*.wav; do echo "file '$PWD/$f'"; done) -c copy output.wav
+
+

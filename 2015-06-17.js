@@ -129,12 +129,17 @@ function concatVideo(info) {
 
 ffmpeg('20150616_1.mp4')
   .input('20150616_2.mp4')
-  .input('20150616_2.mp4')
+//  .input('20150616_2.mp4')
+  .input('20150616_3.mp4')
+  .input('20150616_4.mp4')
   .on('error', function(err) {
     console.log('An error occurred: ' + err.message);
   })
   .on('end', function() {
     console.log('Merging finished !');
+  })
+  .on('progress', function(progress) {
+  	console.log('Processing: ' + progress.percent + '% done')
   })
   .mergeToFile('20150616.mp4', '/tmp');
 
