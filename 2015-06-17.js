@@ -124,11 +124,60 @@ function downloadAllActs() {
 				console.log()
 				console.log("Finished extracting urls")
 
-				concatVideo3(info)
+				concatVideo4(info)
 				//concatVideo(info)
 			}
 		)
 	})
+}
+
+function concatVideo4(info) {
+	// ffmpeg -f concat -i <(find . -name '*.wav' -printf "file '$PWD/%p'\n") -c copy output.wav
+
+	var sys = require('sys')
+	var exec = require('child_process').exec;
+
+	var uploadDate = info[0].upload_date
+	var targetFilename = uploadDate + "." + info[0].ext
+
+	if(fs.existsSync(targetFilename)) {
+		console.log(targetFilename + " exists, so not overwriting")
+		return
+	}
+	
+	var execString = 
+	"shopt -s extglob; " + 
+	"ffmpeg -f concat -i <(for f in ./" + uploadDate + "_*." + info[0].ext + ";" +
+	' do echo "file' +
+	" '$PWD/$f'\"; done) -c copy " + uploadDate + "." + info[0].ext
+
+	// Works
+	execString = 
+	'(printf "file \'$PWD/%s\'\\n" ./' + uploadDate + '_*.' + info[0].ext + ')'
+	
+	// ffmpeg -f concat -i <(find . -name '*.wav' -printf "file '$PWD/%p'\n") -c copy output.wav
+
+	var execSubString = execString
+	execString = "ffmpeg -f concat -i <" + execSubString + " -c copy output.mp4"
+
+	console.log(execString)
+	//return
+
+	console.log("Executing: " + execString)
+	//console.log(execString)
+	//return
+
+	exec(execString, function (error, stdout, stderr) {
+	//exec("ls -l", function (error, stdout, stderr) {
+	  //sys.print('stdout: ' + stdout);
+	  //sys.print('stderr: ' + stderr);
+	  console.log('stdout: ' + stdout)
+	  console.log('stderr: ' + stderr)
+	  if (error !== null) {
+	    console.log('exec error: ' + error);
+	  }
+	})
+
 }
 
 function concatVideo3(info) {
@@ -146,12 +195,13 @@ function concatVideo3(info) {
 	}
 	
 	var execString = 
+	"shopt -s extglob; " + 
 	"ffmpeg -f concat -i <(for f in ./" + uploadDate + "_*." + info[0].ext + ";" +
 	' do echo "file' +
 	" '$PWD/$f'\"; done) -c copy " + uploadDate + "." + info[0].ext
 
 	// It isn't working, lets try unpacking it a bit.
-	
+
 
 	console.log("Executing: " + execString)
 	//console.log(execString)
