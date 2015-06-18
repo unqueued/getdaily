@@ -1,5 +1,13 @@
 #!/usr/bin/env node
 
+/*
+
+TODO:
+Completely refactor.
+Should only make one call to youtube get info, then keep refering to that.
+
+*/
+
 var youtubedl = require('youtube-dl');
 var async = require('async')
 var fs = require('fs')
@@ -116,32 +124,74 @@ function downloadAllActs() {
 				console.log()
 				console.log("Finished extracting urls")
 
-				concatVideo(info)
+				concatVideo3(info)
+				//concatVideo(info)
 			}
 		)
 	})
 }
 
+function concatVideo3(info) {
+	// ffmpeg -f concat -i <(for f in ./*.wav; do echo "file '$PWD/$f'"; done) -c copy output.wav
+
+	var sys = require('sys')
+	var exec = require('child_process').exec;
+
+	var uploadDate = info[0].upload_date
+	var targetFilename = uploadDate + "." + info[0].ext
+
+	if(fs.existsSync(targetFilename)) {
+		console.log(targetFilename + " exists, so not overwriting")
+		return
+	}
+	
+	var execString = 
+	"ffmpeg -f concat -i <(for f in ./" + uploadDate + "_*." + info[0].ext + ";" +
+	' do echo "file' +
+	" '$PWD/$f'\"; done) -c copy " + uploadDate + "." + info[0].ext
+
+	// It isn't working, lets try unpacking it a bit.
+	
+
+	console.log("Executing: " + execString)
+	//console.log(execString)
+	//return
+
+	exec(execString, function (error, stdout, stderr) {
+	//exec("ls -l", function (error, stdout, stderr) {
+	  //sys.print('stdout: ' + stdout);
+	  //sys.print('stderr: ' + stderr);
+	  console.log('stdout: ' + stdout)
+	  console.log('stderr: ' + stderr)
+	  if (error !== null) {
+	    console.log('exec error: ' + error);
+	  }
+	})
+
+}
+
+// This version works, but, it completely re-encodes everything.
+// It's probably simpler to just directly invoke ffmpeg from the shell...
 function concatVideo(info) {
 	var ffmpeg = require('fluent-ffmpeg')
 	var command = ffmpeg()
 
 
-ffmpeg('20150616_1.mp4')
-  .input('20150616_2.mp4')
-//  .input('20150616_2.mp4')
-  .input('20150616_3.mp4')
-  .input('20150616_4.mp4')
-  .on('error', function(err) {
-    console.log('An error occurred: ' + err.message);
-  })
-  .on('end', function() {
-    console.log('Merging finished !');
-  })
-  .on('progress', function(progress) {
-  	console.log('Processing: ' + progress.percent + '% done')
-  })
-  .mergeToFile('20150616.mp4', '/tmp');
+	ffmpeg('20150616_1.mp4')
+	  .input('20150616_2.mp4')
+	//  .input('20150616_2.mp4')
+	  .input('20150616_3.mp4')
+	  .input('20150616_4.mp4')
+	  .on('error', function(err) {
+	    console.log('An error occurred: ' + err.message);
+	  })
+	  .on('end', function() {
+	    console.log('Merging finished !');
+	  })
+	  .on('progress', function(progress) {
+	  	console.log('Processing: ' + progress.percent + '% done')
+	  })
+	  .mergeToFile('20150616.mp4', '/tmp');
 
 	/*
 ffmpeg('/path/to/part1.avi')
