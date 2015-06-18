@@ -63,6 +63,24 @@ So, maybe can try:
 ffmpeg -f concat -i <(find . -name '*.wav' -printf "file '$PWD/%p'\n") -c copy output.wav
 
 
+That won't work, because subshell can't...
+OK, but, maybe if I...
+
+
+OK, I'm learning a ton.
+Here's a good example:
+sh -c "cat <(ls -l)"
+OK, this sould work:
+sh -c "ls -l | cat"
+
+So, just refactor...
+
+This works, assuming that it is invoked with sh -c ""
+sh -c "for f in ./*.mp4; do echo \"file '$PWD/$f'\"; done"
+
+With the important part being to print ' properly...
+
+
 ---
 Interesting:
 http://shapeshed.com/command-line-utilities-with-nodejs/

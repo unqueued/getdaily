@@ -160,6 +160,12 @@ function concatVideo4(info) {
 	var execSubString = execString
 	execString = "ffmpeg -f concat -i <" + execSubString + " -c copy output.mp4"
 
+	// Lets try something more basic, to explore how things are executed:
+	execString = "for f in ./*.mp4; do echo \"file '$PWD/$f'\"; done"
+
+	execSubString = execString
+	execString = execString + " | ffmpeg -f concat -i - -c copy " + targetFilename
+
 	console.log(execString)
 	//return
 
