@@ -127,35 +127,16 @@ function concatVideo(info) {
 	var command = ffmpeg()
 
 
-	async.eachSeries(
-		info,
-		function(item, callback) {
-			var filename = item.upload_date + "_" + item.playlist_index + "." + item.ext
-			
-			console.log()
-			console.log("Adding filename: " + filename)
-			console.log()
-
-			ffmpeg().input(filename)
-
-			callback()
-		},
-		function(err) {
-			console.log("Finished adding files")
-			
-			ffmpeg().on('error', function(err) {
-				console.log('An error occurred: ' + err.message)
-			})
-
-			ffmpeg().on('end', function() {
-				console.log("Merging finished")
-			})
-
-			console.log("About to merge files")
-
-			ffmpeg().mergeToFile(info[0].upload_date, "/tmp")
-		}
-	)
+ffmpeg('20150616_1.mp4')
+  .input('20150616_2.mp4')
+  .input('20150616_2.mp4')
+  .on('error', function(err) {
+    console.log('An error occurred: ' + err.message);
+  })
+  .on('end', function() {
+    console.log('Merging finished !');
+  })
+  .mergeToFile('20150616.mp4', '/tmp');
 
 	/*
 ffmpeg('/path/to/part1.avi')
@@ -203,7 +184,7 @@ function concatVideo2(info) {
 
 			console.log("About to merge files")
 
-			ffmpeg().mergeToFile(info[0].upload_date, "/tmp")
+			ffmpeg().mergeToFile("output.mp4", "/tmp")
 		}
 	)
 

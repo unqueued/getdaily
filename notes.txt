@@ -32,3 +32,11 @@ ffmpeg('/path/to/part1.avi')
   })
   .mergeToFile('/path/to/merged.avi', '/path/to/tempDir');
 ---
+
+I found this insanely helpful tutorial for getting ffprobe installed on osx via brew:
+http://www.renevolution.com/how-to-install-ffmpeg-on-mac-os-x/
+
+So, rebuilding with this:
+brew install ffmpeg --with-fdk-aac --with-ffplay --with-freetype --with-frei0r --with-libass --with-libvo-aacenc --with-libvorbis --with-libvpx --with-opencore-amr --with-openjpeg --with-opus --with-rtmpdump --with-schroedinger --with-speex --with-theora --with-tools
+
+
