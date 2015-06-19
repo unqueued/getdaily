@@ -72,7 +72,8 @@ function makeNatoString(dateString) {
 
 // TEst to see if a video format exists for all four streams
 
-var format = "vhttp-200"
+//var format = "vhttp-200"
+var format = "vhttp-3500"
 
 //console.log("About to get")
 
