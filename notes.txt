@@ -108,3 +108,15 @@ ffmpeg -i 2015-06-18_thedailyshow_malala-yousafzai.mp4 -y -metadata title="title
 Here is a table of properties:
 http://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata
 
+Maybe try it without description?
+
+Or try it on a different mpeg file?
+
+ffmpeg -i 2015-06-17_thedailyshow_bill-clinton.mp4 -y -metadata title="title" -metadata description="This is an episode of the daily show" -c copy 2015-06-17_thedailyshow_bill-clinton.mp4
+
+FUCK!
+ffmpeg truncated the files!
+Should have been more careful.
+I guess it can't handle larger files.
+It would make sense that it would work with smaller mp3 files.
+
