@@ -101,3 +101,10 @@ http://www.dzone.com/snippets/execute-unix-command-nodejs
 FFMPEG metadata:
 http://www.benfarrell.com/2012/07/23/injecting-metadata-with-ffmpeg-and-node-js/
 ^ This worked!
+
+This appeared to have worked, however, VLC barfed:
+ffmpeg -i 2015-06-18_thedailyshow_malala-yousafzai.mp4 -y -metadata title="title" -metadata description="This is an episode of the daily show" -c copy 2015-06-18_thedailyshow_malala-yousafzai.mp4
+
+Here is a table of properties:
+http://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata
+
