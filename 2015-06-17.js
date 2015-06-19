@@ -55,6 +55,21 @@ function parseUploadDate(dateString) {
 	return upload_date
 }
 
+function makeNatoString(dateString) {
+
+	console.log("Parsing " + dateString)
+	console.log("Year: " + dateString.slice(0, 4))
+	console.log("Month: " + dateString.slice(4, 6))
+	console.log("Day: " + dateString.slice(6, 8))
+
+	var slicedString =
+		dateString.slice(0, 4) + "-" +
+		dateString.slice(4, 6) + "-" +
+		dateString.slice(6, 8) + "-"
+
+	return slicedString
+}
+
 // TEst to see if a video format exists for all four streams
 
 var format = "vhttp-200"
@@ -164,7 +179,7 @@ function concatVideo4(info) {
   	console.log("Guest name: " + guestName.toLowerCase())
 
 	var uploadDate = info[0].upload_date
-	var targetFilename = uploadDate + "_thedailyshow_" + guestName.toLowerCase() + "." + info[0].ext
+	var targetFilename = makeNatoString(uploadDate) + "_thedailyshow_" + guestName.toLowerCase() + "." + info[0].ext
 
 	var execString = 
 	"shopt -s extglob; " + 
