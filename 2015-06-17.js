@@ -150,14 +150,22 @@ function concatVideo4(info) {
 	var sys = require('sys')
 	var exec = require('child_process').exec;
 
-	var uploadDate = info[0].upload_date
-	var targetFilename = uploadDate + "." + info[0].ext
-
 	if(fs.existsSync(targetFilename)) {
 		console.log(targetFilename + " exists, so not overwriting")
 		return
 	}
-	
+
+  	var guestName = info[0].playlist_title.split(" - ")[1]
+  	if(guestName == null) {
+  		console.err("unable to parse guest name!")
+  		process.exit(1)
+  	}
+  	guestName = guestName.replace(" ", "-")
+  	console.log("Guest name: " + guestName.toLowerCase())
+
+	var uploadDate = info[0].upload_date
+	var targetFilename = uploadDate + "_thedailyshow_" + guestName.toLowerCase() + "." + info[0].ext
+
 	var execString = 
 	"shopt -s extglob; " + 
 	"ffmpeg -f concat -i <(for f in ./" + uploadDate + "_*." + info[0].ext + ";" +
@@ -204,13 +212,7 @@ function concatVideo4(info) {
 
 	  		//fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
 	  	}
-	  	var guestName = info[0].playlist_title.split(" - ")[1]
-	  	if(guestName == null) {
-	  		console.err("unable to parse guest name!")
-	  		process.exit(1)
-	  	}
-	  	guestName = guestName.replace(" ", "-")
-	  	//console.log("Guest name: " + guestName)
+
 	  	console.log("Renaming to: " +  targetFilename)
 	  }
 	})
