@@ -80,6 +80,8 @@ sh -c "for f in ./*.mp4; do echo \"file '$PWD/$f'\"; done"
 
 With the important part being to print ' properly...
 
+THIS IS INTERESTING I SHOULD BLOG ABOUT IT
+And in general, how to fix <() in non interactive shells
 
 ---
 Interesting:
@@ -94,3 +96,8 @@ Excellent example of how to execure a shell script with node.js:
 http://www.dzone.com/snippets/execute-unix-command-nodejs
 
 
+---
+
+FFMPEG metadata:
+http://www.benfarrell.com/2012/07/23/injecting-metadata-with-ffmpeg-and-node-js/
+^ This worked!
