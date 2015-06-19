@@ -221,12 +221,13 @@ function concatVideo4(info) {
 		"-c copy "	+		// Codec
 		
 							// Metadata
-		' -metadata title="' + info[0].playlist_title + '"' +
+		//' -metadata title="' + info[0].playlist_title + '"' +
+		' -metadata title="The Daily Show With Jon Stewart"' +
 		' -metadata description="' + addSlashes(info[0].description) + '"' +
 		' -metadata synopsis="' + addSlashes(info[0].description) + '"' +
 		' -metadata year="' + info[0].upload_date.slice(0, 4) + '"' +
 		' -metadata date="' + info[0].upload_date.slice(0, 4) + '"' +
-		' -metadata show="' + "The Daily Show" + '"' +
+		' -metadata show="The Daily Show With Jon Stewart"' +
 		' -metadata copyright="' + "Comedy Central" + '"' +
 		' -metadata comment="' + "downloaded with getdaily.js" + '"' +
 		' -metadata genre="' + "Comedy" + '" ' + targetFilename
