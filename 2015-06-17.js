@@ -209,6 +209,8 @@ function concatVideo4(info) {
 	  		console.err("unable to parse guest name!")
 	  		process.exit(1)
 	  	}
+	  	guestName = guestName.replace(" ", "-")
+	  	//console.log("Guest name: " + guestName)
 	  	console.log("Renaming to: " +  targetFilename)
 	  }
 	})
