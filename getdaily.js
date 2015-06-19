@@ -69,11 +69,6 @@ function parseUploadDate(dateString) {
 
 function makeNatoString(dateString) {
 
-	console.log("Parsing " + dateString)
-	console.log("Year: " + dateString.slice(0, 4))
-	console.log("Month: " + dateString.slice(4, 6))
-	console.log("Day: " + dateString.slice(6, 8))
-
 	var slicedString =
 		dateString.slice(0, 4) + "-" +
 		dateString.slice(4, 6) + "-" +
@@ -82,12 +77,8 @@ function makeNatoString(dateString) {
 	return slicedString
 }
 
-// TEst to see if a video format exists for all four streams
-
 var format = "vhttp-200"
 //var format = "vhttp-3500"
-
-//console.log("About to get")
 
 //getFormats(format)
 
@@ -117,10 +108,6 @@ function downloadAllActs() {
 					}
 					return true
 				})
-
-				console.log()
-				console.log("" + filename + " exists: " + fs.existsSync(filename))
-				console.log()
 
 				if(fs.existsSync(filename)) {
 					console.log("File already exists, skipping")
@@ -165,15 +152,13 @@ function downloadAllActs() {
 				console.log()
 				console.log("Finished extracting urls")
 
-				concatVideo4(info)
-				//concatVideo(info)
+				concatVideo(info)
 			}
 		)
 	})
 }
 
-function concatVideo4(info) {
-	// ffmpeg -f concat -i <(find . -name '*.wav' -printf "file '$PWD/%p'\n") -c copy output.wav
+function concatVideo(info) {
 
 	var sys = require('sys')
 	var exec = require('child_process').exec;
@@ -189,31 +174,12 @@ function concatVideo4(info) {
   		process.exit(1)
   	}
   	guestName = guestName.replace(" ", "-")
-  	console.log("Guest name: " + guestName.toLowerCase())
 
 	var uploadDate = info[0].upload_date
 	var targetFilename = makeNatoString(uploadDate) + "_thedailyshow_" + guestName.toLowerCase() + "." + info[0].ext
 
-	var execString = 
-	"shopt -s extglob; " + 
-	"ffmpeg -f concat -i <(for f in ./" + uploadDate + "_*." + info[0].ext + ";" +
-	' do echo "file' +
-	" '$PWD/$f'\"; done) -c copy " + uploadDate + "." + info[0].ext
+	var execString = "for f in ./" + uploadDate + '_*.' + info[0].ext + "; do echo \"file '$PWD/$f'\"; done "
 
-	// Works
-	execString = 
-	'(printf "file \'$PWD/%s\'\\n" ./' + uploadDate + '_*.' + info[0].ext + ')'
-	
-	// ffmpeg -f concat -i <(find . -name '*.wav' -printf "file '$PWD/%p'\n") -c copy output.wav
-
-	var execSubString = execString
-	execString = "ffmpeg -f concat -i <" + execSubString + " -c copy output.mp4"
-
-	// Lets try something more basic, to explore how things are executed:
-	execString = "for f in ./" + uploadDate + '_*.' + info[0].ext + "; do echo \"file '$PWD/$f'\"; done "
-
-	//execSubString = execString
-	
 	var ffmpegString = 
 		"| " + "ffmpeg " +	// Pipe and executable name
 		"-f concat " +		// Format
@@ -232,28 +198,11 @@ function concatVideo4(info) {
 		' -metadata comment="' + "downloaded with getdaily.js" + '"' +
 		' -metadata genre="' + "Comedy" + '" ' + targetFilename
 
-
-
-	console.log("Appending metadata:")
-	console.log("playlist title: " + info[0].playlist_title)
-
-	console.log("ffmpegString: " + ffmpegString)
-
 	execString = execString + ffmpegString 
 
-	console.log(execString)
-	//return
-
-	console.log("Executing: " + execString)
-	//console.log(execString)
-	//return
-
 	exec(execString, function (error, stdout, stderr) {
-	//exec("ls -l", function (error, stdout, stderr) {
-	  //sys.print('stdout: ' + stdout);
-	  //sys.print('stderr: ' + stderr);
-	  console.log('stdout: ' + stdout)
-	  console.log('stderr: ' + stderr)
+	  //console.log('stdout: ' + stdout)
+	  //console.log('stderr: ' + stderr)
 	  if (error !== null) {
 	    console.log('exec error: ' + error)
 	  } else {
@@ -261,13 +210,10 @@ function concatVideo4(info) {
 	  	console.log(info.length)
 	  	for(var i = 1; i <= 4; i++) {
 	  		console.log("Deleting ")
-	  		//item.upload_date + "_" + item.playlist_index + "." + item.ext
 	  		console.log(info[0].upload_date + "_" + i + "." + info[0].ext)
 
 	  		fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
 	  	}
-
-	  	console.log("Renaming to: " +  targetFilename)
 	  }
 	})
 
