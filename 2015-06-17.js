@@ -47,6 +47,18 @@ if(process.argv.length < 2) {
 }
 url = process.argv[2]
 
+
+function addSlashes(string) {
+    return string.replace(/\\/g, '\\\\').
+        replace(/\u0008/g, '\\b').
+        replace(/\t/g, '\\t').
+        replace(/\n/g, '\\n').
+        replace(/\f/g, '\\f').
+        replace(/\r/g, '\\r').
+        replace(/'/g, '\\\'').
+        replace(/"/g, '\\"');
+}
+
 function parseUploadDate(dateString) {
 	var upload_date = new Date()
 	upload_date.setYear(dateString.slice(0, 4))
@@ -210,10 +222,13 @@ function concatVideo4(info) {
 		
 							// Metadata
 		' -metadata title="' + info[0].playlist_title + '"' +
-		//' -metadata description="' + info[0].description + '"' +
-		//' -metadata synopsis="' + info[0].description + '"' +
+		' -metadata description="' + addSlashes(info[0].description) + '"' +
+		' -metadata synopsis="' + addSlashes(info[0].description) + '"' +
 		' -metadata year="' + info[0].upload_date.slice(0, 4) + '"' +
+		' -metadata date="' + info[0].upload_date.slice(0, 4) + '"' +
 		' -metadata show="' + "The Daily Show" + '"' +
+		' -metadata copyright="' + "Comedy Central" + '"' +
+		' -metadata comment="' + "downloaded with getdaily.js" + '"' +
 		' -metadata genre="' + "Comedy" + '" ' + targetFilename
 
 
@@ -248,7 +263,7 @@ function concatVideo4(info) {
 	  		//item.upload_date + "_" + item.playlist_index + "." + item.ext
 	  		console.log(info[0].upload_date + "_" + i + "." + info[0].ext)
 
-	  		//fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
+	  		fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
 	  	}
 
 	  	console.log("Renaming to: " +  targetFilename)
