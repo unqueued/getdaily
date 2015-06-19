@@ -65,7 +65,7 @@ function makeNatoString(dateString) {
 	var slicedString =
 		dateString.slice(0, 4) + "-" +
 		dateString.slice(4, 6) + "-" +
-		dateString.slice(6, 8) + "-"
+		dateString.slice(6, 8)
 
 	return slicedString
 }
@@ -225,7 +225,7 @@ function concatVideo4(info) {
 	  		//item.upload_date + "_" + item.playlist_index + "." + item.ext
 	  		console.log(info[0].upload_date + "_" + i + "." + info[0].ext)
 
-	  		//fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
+	  		fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
 	  	}
 
 	  	console.log("Renaming to: " +  targetFilename)
