@@ -120,3 +120,16 @@ Should have been more careful.
 I guess it can't handle larger files.
 It would make sense that it would work with smaller mp3 files.
 
+Awesome!
+Almost done, but a few issues.
+
+Need to addslashes or something, so that ffmpeg doesn't barf when getting input:
+http://stackoverflow.com/questions/2195568/how-do-i-add-slashes-to-a-string-in-javascript
+
+str = str.replace(/'/g, "\\'");
+
+That's probably what I need.
+Also, iTunes doesn't accept year metadata.
+
+Why year no work?
+for f in ./20150616_*.mp4; do echo "file '$PWD/$f'"; done | ffmpeg -f concat -i - -c copy  -metadata title="thedailyshow June 16, 2015 - Aziz Ansari" -metadata year="2015" -metadata date="2015" -metadata show="The Daily Show" -metadata genre="Comedy" 2015-06-16_thedailyshow_aziz-ansari.mp4

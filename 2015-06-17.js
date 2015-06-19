@@ -72,8 +72,8 @@ function makeNatoString(dateString) {
 
 // TEst to see if a video format exists for all four streams
 
-//var format = "vhttp-200"
-var format = "vhttp-3500"
+var format = "vhttp-200"
+//var format = "vhttp-3500"
 
 //console.log("About to get")
 
@@ -198,10 +198,32 @@ function concatVideo4(info) {
 	execString = "ffmpeg -f concat -i <" + execSubString + " -c copy output.mp4"
 
 	// Lets try something more basic, to explore how things are executed:
-	execString = "for f in ./" + uploadDate + '_*.' + info[0].ext + "; do echo \"file '$PWD/$f'\"; done"
+	execString = "for f in ./" + uploadDate + '_*.' + info[0].ext + "; do echo \"file '$PWD/$f'\"; done "
 
-	execSubString = execString
-	execString = execString + " | ffmpeg -f concat -i - -c copy " + targetFilename
+	//execSubString = execString
+	
+	var ffmpegString = 
+		"| " + "ffmpeg " +	// Pipe and executable name
+		"-f concat " +		// Format
+		"-i - " +			// Input file name
+		"-c copy "	+		// Codec
+		
+							// Metadata
+		' -metadata title="' + info[0].playlist_title + '"' +
+		//' -metadata description="' + info[0].description + '"' +
+		//' -metadata synopsis="' + info[0].description + '"' +
+		' -metadata year="' + info[0].upload_date.slice(0, 4) + '"' +
+		' -metadata show="' + "The Daily Show" + '"' +
+		' -metadata genre="' + "Comedy" + '" ' + targetFilename
+
+
+
+	console.log("Appending metadata:")
+	console.log("playlist title: " + info[0].playlist_title)
+
+	console.log("ffmpegString: " + ffmpegString)
+
+	execString = execString + ffmpegString 
 
 	console.log(execString)
 	//return
@@ -226,7 +248,7 @@ function concatVideo4(info) {
 	  		//item.upload_date + "_" + item.playlist_index + "." + item.ext
 	  		console.log(info[0].upload_date + "_" + i + "." + info[0].ext)
 
-	  		fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
+	  		//fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
 	  	}
 
 	  	console.log("Renaming to: " +  targetFilename)
