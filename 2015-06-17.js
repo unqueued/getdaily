@@ -12,8 +12,11 @@ var youtubedl = require('youtube-dl');
 var async = require('async')
 var fs = require('fs')
 
+var url
 //var url = "http://thedailyshow.cc.com/full-episodes/8mfir8/june-16--2015---aziz-ansari"
-var url = "http://thedailyshow.cc.com/full-episodes/nkl263/june-17--2015---bill-clinton"
+//var url = "http://thedailyshow.cc.com/full-episodes/drk62j/june-15--2015---judd-apatow"
+//var url = "http://thedailyshow.cc.com/full-episodes/x6kbau/june-10--2015---colin-quinn"
+//var url = "http://thedailyshow.cc.com/full-episodes/nkl263/june-17--2015---bill-clinton"
 
 // Download queue
 var queue = []
@@ -36,6 +39,14 @@ vhttp-2200
 vhttp-3500
 */
 
+
+if(process.argv.length < 2) {
+	console.log("Usage: ")
+	console.log("getdaily.js <url>")
+	process.exit()
+}
+url = process.argv[2]
+
 function parseUploadDate(dateString) {
 	var upload_date = new Date()
 	upload_date.setYear(dateString.slice(0, 4))
@@ -48,7 +59,7 @@ function parseUploadDate(dateString) {
 
 var format = "vhttp-200"
 
-console.log("About to get")
+//console.log("About to get")
 
 //getFormats(format)
 
@@ -57,6 +68,7 @@ downloadAllActs()
 function downloadAllActs() {
 	var video = youtubedl(url, null, function(err, info) {
 		if (err) throw err;
+
 		async.eachSeries(
 			info,
 			function(item, callback) {
@@ -181,7 +193,23 @@ function concatVideo4(info) {
 	  console.log('stdout: ' + stdout)
 	  console.log('stderr: ' + stderr)
 	  if (error !== null) {
-	    console.log('exec error: ' + error);
+	    console.log('exec error: ' + error)
+	  } else {
+	  	console.log("Finished without error, so now I can clean up the leftovers")
+	  	console.log(info.length)
+	  	for(var i = 1; i <= 4; i++) {
+	  		console.log("Deleting ")
+	  		//item.upload_date + "_" + item.playlist_index + "." + item.ext
+	  		console.log(info[0].upload_date + "_" + i + "." + info[0].ext)
+
+	  		//fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
+	  	}
+	  	var guestName = info[0].playlist_title.split(" - ")[1]
+	  	if(guestName == null) {
+	  		console.err("unable to parse guest name!")
+	  		process.exit(1)
+	  	}
+	  	console.log("Renaming to: " +  targetFilename)
 	  }
 	})
 
@@ -222,6 +250,7 @@ function concatVideo3(info) {
 	  console.log('stderr: ' + stderr)
 	  if (error !== null) {
 	    console.log('exec error: ' + error);
+
 	  }
 	})
 
