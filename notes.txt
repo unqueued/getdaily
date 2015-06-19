@@ -133,3 +133,40 @@ Also, iTunes doesn't accept year metadata.
 
 Why year no work?
 for f in ./20150616_*.mp4; do echo "file '$PWD/$f'"; done | ffmpeg -f concat -i - -c copy  -metadata title="thedailyshow June 16, 2015 - Aziz Ansari" -metadata year="2015" -metadata date="2015" -metadata show="The Daily Show" -metadata genre="Comedy" 2015-06-16_thedailyshow_aziz-ansari.mp4
+
+
+OK, awesome!
+Works.
+
+Going to delete some crap now.
+Storing some of my notes in other files.
+
+// References:
+
+// This looks very helpful for how to save video files using pipe stream etc.
+// http://stackoverflow.com/questions/28016289/saving-video-files-using-node-youtube-dl-with-meteorjs
+
+// Goal: Use pipe and stream. That is best way.
+
+// https://ricochen.wordpress.com/2010/04/24/javascript-zero-padding-numbers/
+// How to do month as always two digits with left zero padded:
+// new String('0' + upload_date.getMonth()).slice(-2)
+
+// http://blog.donaldderek.com/tag/youtube-dl/
+// http://pauldbergeron.com/articles/streaming-youtube-to-mp3-audio-in-nodejs.html
+// http://stackoverflow.com/questions/18168432/node-js-how-to-pipe-youtube-to-mp4-to-mp3
+// 
+
+// FFMPEG
+//http://stackoverflow.com/questions/19154807/merging-two-video-streams-and-saving-as-one-file
+
+// Some testing examples
+/*
+ http://thedailyshow.cc.com/full-episodes/okco56/may-13--2015---reza-aslan
+ http://thedailyshow.cc.com/full-episodes/slnsr3/may-12--2015---tom-brokaw
+ http://thedailyshow.cc.com/full-episodes/f2nr6x/may-11--2015---john-legend
+ 
+ http://thedailyshow.cc.com/episodes/rvkbud/june-2--2015---bill-de-blasio
+
+ http://thedailyshow.cc.com/episodes/l77wjf/june-1--2015---stanley-mcchrystal
+*/

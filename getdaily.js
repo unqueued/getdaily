@@ -1,41 +1,27 @@
 #!/usr/bin/env node
 
+/*
+
+TODO:
+Completely refactor.
+Should only make one call to youtube get info, then keep refering to that.
+
+*/
+
 var youtubedl = require('youtube-dl');
 var async = require('async')
 var fs = require('fs')
 
-// References:
+var url
+//var url = "http://thedailyshow.cc.com/full-episodes/8mfir8/june-16--2015---aziz-ansari"
+//var url = "http://thedailyshow.cc.com/full-episodes/drk62j/june-15--2015---judd-apatow"
+//var url = "http://thedailyshow.cc.com/full-episodes/x6kbau/june-10--2015---colin-quinn"
+//var url = "http://thedailyshow.cc.com/full-episodes/nkl263/june-17--2015---bill-clinton"
 
-// This looks very helpful for how to save video files using pipe stream etc.
-// http://stackoverflow.com/questions/28016289/saving-video-files-using-node-youtube-dl-with-meteorjs
-
-// Goal: Use pipe and stream. That is best way.
-
-// https://ricochen.wordpress.com/2010/04/24/javascript-zero-padding-numbers/
-// How to do month as always two digits with left zero padded:
-// new String('0' + upload_date.getMonth()).slice(-2)
-
-// http://blog.donaldderek.com/tag/youtube-dl/
-// http://pauldbergeron.com/articles/streaming-youtube-to-mp3-audio-in-nodejs.html
-// http://stackoverflow.com/questions/18168432/node-js-how-to-pipe-youtube-to-mp4-to-mp3
-// 
-
-// FFMPEG
-//http://stackoverflow.com/questions/19154807/merging-two-video-streams-and-saving-as-one-file
-
-// Some testing examples
-/*
- http://thedailyshow.cc.com/full-episodes/okco56/may-13--2015---reza-aslan
- http://thedailyshow.cc.com/full-episodes/slnsr3/may-12--2015---tom-brokaw
- http://thedailyshow.cc.com/full-episodes/f2nr6x/may-11--2015---john-legend
- 
- http://thedailyshow.cc.com/episodes/rvkbud/june-2--2015---bill-de-blasio
-
- http://thedailyshow.cc.com/episodes/l77wjf/june-1--2015---stanley-mcchrystal
-*/
+// Download queue
+var queue = []
 
 /*
-
 Formats:
 rtmp-1300
 rtmp-250
@@ -51,250 +37,403 @@ vhttp-800
 vhttp-1700
 vhttp-2200
 vhttp-3500
-
 */
 
 
-var url = ""
-
-url = "http://thedailyshow.cc.com/full-episodes/okco56/may-13--2015---reza-aslan"
-//url = "http://thedailyshow.cc.com/episodes/l77wjf/june-1--2015---stanley-mcchrystal"
-
-/*
-if(process.argv.length < 3) {
+if(process.argv.length < 2) {
 	console.log("Usage: ")
-	console.log("getdaily.js" + " [-F]" + " [-f format]" +" <url>")
+	console.log("getdaily.js <url>")
 	process.exit()
 }
 url = process.argv[2]
-*/
-
-// HOw to call the binary directly:
-/*
-ytdl.exec(url, ['-x', '--audio-format', 'mp3'], {}, function(err, output) {
-  if (err) throw err;
-  console.log(output.join('\n'));
-});
-*/
 
 
-//console.log(JSON.stringify(process.argv))
-//console.log(__filename)
+function addSlashes(string) {
+    return string.replace(/\\/g, '\\\\').
+        replace(/\u0008/g, '\\b').
+        replace(/\t/g, '\\t').
+        replace(/\n/g, '\\n').
+        replace(/\f/g, '\\f').
+        replace(/\r/g, '\\r').
+        replace(/'/g, '\\\'').
+        replace(/"/g, '\\"');
+}
 
-//process.argv.forEach(function(val, index, array) {
-//  console.log(index + ': ' + val);
-//});
-
-var options;
-youtubedl.getInfo(url, options, function(err, info) {
-	// Disable this function
-	return
-
-	if (err) throw err;
-
-	var title = info[0].playlist_title
-	var description = info[0].description
-
-	// Dates appear like this: 20150507
-	// From: http://stackoverflow.com/questions/4170117/how-to-parse-the-year-from-this-date-string-in-javascript
-	// .slice(0,4)
+function parseUploadDate(dateString) {
 	var upload_date = new Date()
-	upload_date.setYear(info[0].upload_date.slice(0, 4))
-	upload_date.setMonth(info[0].upload_date.slice(5, 6))
-	upload_date.setDate(info[0].upload_date.slice(7, 8))
+	upload_date.setYear(dateString.slice(0, 4))
+	upload_date.setMonth(dateString.slice(5, 6))
+	upload_date.setDate(dateString.slice(7, 8))
+	return upload_date
+}
+
+function makeNatoString(dateString) {
+
+	console.log("Parsing " + dateString)
+	console.log("Year: " + dateString.slice(0, 4))
+	console.log("Month: " + dateString.slice(4, 6))
+	console.log("Day: " + dateString.slice(6, 8))
+
+	var slicedString =
+		dateString.slice(0, 4) + "-" +
+		dateString.slice(4, 6) + "-" +
+		dateString.slice(6, 8)
+
+	return slicedString
+}
+
+// TEst to see if a video format exists for all four streams
+
+var format = "vhttp-200"
+//var format = "vhttp-3500"
+
+//console.log("About to get")
+
+//getFormats(format)
+
+downloadAllActs()
+
+function downloadAllActs() {
+	var video = youtubedl(url, null, function(err, info) {
+		if (err) throw err;
+
+		async.eachSeries(
+			info,
+			function(item, callback) {
+				var url
+				var filename = item.upload_date + "_" + item.playlist_index + "." + item.ext
+
+				console.log("---")
+				console.log()
+
+				console.log("Downloading playlist index: " + item.playlist_index)
+				console.log("To filename: " + filename)
+
+				item.formats.every(function(element, index, array) {
+					if(element.format_id == format) {
+						url = element.url
+						console.log("URL for " + format + ": " + element.url)
+						return false
+					}
+					return true
+				})
+
+				console.log()
+				console.log("" + filename + " exists: " + fs.existsSync(filename))
+				console.log()
+
+				if(fs.existsSync(filename)) {
+					console.log("File already exists, skipping")
+					callback()
+				} else {
+					var videoDownload = youtubedl(url, null, null)
+
+					var size = 0;
+					videoDownload.on('info', function(info) {
+						size = info.size
+						console.log('Download started')
+						//console.log('filename: ' + info._filename)
+						console.log('filename: ' + filename)
+						console.log('size: ' + info.size)
+
+						var output = filename
+						console.log("Downloading to " + filename)
+						videoDownload.pipe(fs.createWriteStream(output))
+					})
+
+					var pos = 0;
+					videoDownload.on('data', function(data) {
+						pos += data.length
+						// `size` should not be 0 here.
+						if (size) {
+							var percent = (pos / size * 100).toFixed(2)
+							process.stdout.cursorTo(0)
+							process.stdout.clearLine(1)
+							process.stdout.write(percent + '%')
+						}
+					})
+
+					videoDownload.on('end', function(data) {
+						console.log()
+						console.log("Download completed, doing callback()")
+						callback()
+					})
+				}
+
+			},
+			function(err) {
+				console.log()
+				console.log("Finished extracting urls")
+
+				concatVideo4(info)
+				//concatVideo(info)
+			}
+		)
+	})
+}
+
+function concatVideo4(info) {
+	// ffmpeg -f concat -i <(find . -name '*.wav' -printf "file '$PWD/%p'\n") -c copy output.wav
+
+	var sys = require('sys')
+	var exec = require('child_process').exec;
+
+	if(fs.existsSync(targetFilename)) {
+		console.log(targetFilename + " exists, so not overwriting")
+		return
+	}
+
+  	var guestName = info[0].playlist_title.split(" - ")[1]
+  	if(guestName == null) {
+  		console.err("unable to parse guest name!")
+  		process.exit(1)
+  	}
+  	guestName = guestName.replace(" ", "-")
+  	console.log("Guest name: " + guestName.toLowerCase())
+
+	var uploadDate = info[0].upload_date
+	var targetFilename = makeNatoString(uploadDate) + "_thedailyshow_" + guestName.toLowerCase() + "." + info[0].ext
+
+	var execString = 
+	"shopt -s extglob; " + 
+	"ffmpeg -f concat -i <(for f in ./" + uploadDate + "_*." + info[0].ext + ";" +
+	' do echo "file' +
+	" '$PWD/$f'\"; done) -c copy " + uploadDate + "." + info[0].ext
+
+	// Works
+	execString = 
+	'(printf "file \'$PWD/%s\'\\n" ./' + uploadDate + '_*.' + info[0].ext + ')'
 	
-	var urls = []
-	var format = ""
+	// ffmpeg -f concat -i <(find . -name '*.wav' -printf "file '$PWD/%p'\n") -c copy output.wav
 
-	//if(process.argv[3] == null)
+	var execSubString = execString
+	execString = "ffmpeg -f concat -i <" + execSubString + " -c copy output.mp4"
 
-	//console.log(info)
-	// async.eachSeries
+	// Lets try something more basic, to explore how things are executed:
+	execString = "for f in ./" + uploadDate + '_*.' + info[0].ext + "; do echo \"file '$PWD/$f'\"; done "
+
+	//execSubString = execString
+	
+	var ffmpegString = 
+		"| " + "ffmpeg " +	// Pipe and executable name
+		"-f concat " +		// Format
+		"-i - " +			// Input file name
+		"-c copy "	+		// Codec
+		
+							// Metadata
+		//' -metadata title="' + info[0].playlist_title + '"' +
+		' -metadata title="The Daily Show With Jon Stewart"' +
+		' -metadata description="' + addSlashes(info[0].description) + '"' +
+		' -metadata synopsis="' + addSlashes(info[0].description) + '"' +
+		' -metadata year="' + info[0].upload_date.slice(0, 4) + '"' +
+		' -metadata date="' + info[0].upload_date.slice(0, 4) + '"' +
+		' -metadata show="The Daily Show With Jon Stewart"' +
+		' -metadata copyright="' + "Comedy Central" + '"' +
+		' -metadata comment="' + "downloaded with getdaily.js" + '"' +
+		' -metadata genre="' + "Comedy" + '" ' + targetFilename
+
+
+
+	console.log("Appending metadata:")
+	console.log("playlist title: " + info[0].playlist_title)
+
+	console.log("ffmpegString: " + ffmpegString)
+
+	execString = execString + ffmpegString 
+
+	console.log(execString)
+	//return
+
+	console.log("Executing: " + execString)
+	//console.log(execString)
+	//return
+
+	exec(execString, function (error, stdout, stderr) {
+	//exec("ls -l", function (error, stdout, stderr) {
+	  //sys.print('stdout: ' + stdout);
+	  //sys.print('stderr: ' + stderr);
+	  console.log('stdout: ' + stdout)
+	  console.log('stderr: ' + stderr)
+	  if (error !== null) {
+	    console.log('exec error: ' + error)
+	  } else {
+	  	console.log("Finished without error, so now I can clean up the leftovers")
+	  	console.log(info.length)
+	  	for(var i = 1; i <= 4; i++) {
+	  		console.log("Deleting ")
+	  		//item.upload_date + "_" + item.playlist_index + "." + item.ext
+	  		console.log(info[0].upload_date + "_" + i + "." + info[0].ext)
+
+	  		fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
+	  	}
+
+	  	console.log("Renaming to: " +  targetFilename)
+	  }
+	})
+
+}
+
+function concatVideo3(info) {
+	// ffmpeg -f concat -i <(for f in ./*.wav; do echo "file '$PWD/$f'"; done) -c copy output.wav
+
+	var sys = require('sys')
+	var exec = require('child_process').exec;
+
+	var uploadDate = info[0].upload_date
+	var targetFilename = uploadDate + "." + info[0].ext
+
+	if(fs.existsSync(targetFilename)) {
+		console.log(targetFilename + " exists, so not overwriting")
+		return
+	}
+	
+	var execString = 
+	"shopt -s extglob; " + 
+	"ffmpeg -f concat -i <(for f in ./" + uploadDate + "_*." + info[0].ext + ";" +
+	' do echo "file' +
+	" '$PWD/$f'\"; done) -c copy " + uploadDate + "." + info[0].ext
+
+	// It isn't working, lets try unpacking it a bit.
+
+
+	console.log("Executing: " + execString)
+	//console.log(execString)
+	//return
+
+	exec(execString, function (error, stdout, stderr) {
+	//exec("ls -l", function (error, stdout, stderr) {
+	  //sys.print('stdout: ' + stdout);
+	  //sys.print('stderr: ' + stderr);
+	  console.log('stdout: ' + stdout)
+	  console.log('stderr: ' + stderr)
+	  if (error !== null) {
+	    console.log('exec error: ' + error);
+
+	  }
+	})
+
+}
+
+// This version works, but, it completely re-encodes everything.
+// It's probably simpler to just directly invoke ffmpeg from the shell...
+function concatVideo(info) {
+	var ffmpeg = require('fluent-ffmpeg')
+	var command = ffmpeg()
+
+
+	ffmpeg('20150616_1.mp4')
+	  .input('20150616_2.mp4')
+	//  .input('20150616_2.mp4')
+	  .input('20150616_3.mp4')
+	  .input('20150616_4.mp4')
+	  .on('error', function(err) {
+	    console.log('An error occurred: ' + err.message);
+	  })
+	  .on('end', function() {
+	    console.log('Merging finished !');
+	  })
+	  .on('progress', function(progress) {
+	  	console.log('Processing: ' + progress.percent + '% done')
+	  })
+	  .mergeToFile('20150616.mp4', '/tmp');
+
+	/*
+ffmpeg('/path/to/part1.avi')
+  .input('/path/to/part2.avi')
+  .input('/path/to/part2.avi')
+  .on('error', function(err) {
+    console.log('An error occurred: ' + err.message);
+  })
+  .on('end', function() {
+    console.log('Merging finished !');
+  })
+  .mergeToFile('/path/to/merged.avi', '/path/to/tempDir');
+  */
+
+}
+
+function concatVideo2(info) {
+	var ffmpeg = require('fluent-ffmpeg')
+	var command = ffmpeg()
+
+
 	async.eachSeries(
 		info,
 		function(item, callback) {
-			var url
-			//console.log("Video to download:")
-			//console.log(JSON.stringify(item))
+			var filename = item.upload_date + "_" + item.playlist_index + "." + item.ext
+			
+			console.log()
+			console.log("Adding filename: " + filename)
+			console.log()
 
-			item.formats.every(function(element, index, array) {
-				//console.log("Element:")
-				if(element.format_id == "vhttp-3500") {
-					//console.log(element)
-					return false
-				}
-				return true
-			})
-			console.log("---")
+			ffmpeg().input(filename)
+
 			callback()
 		},
 		function(err) {
-			//console.log("Finished extracting urls")
+			console.log("Finished adding files")
+			
+			ffmpeg().on('error', function(err) {
+				console.log('An error occurred: ' + err.message)
+			})
+
+			ffmpeg().on('end', function() {
+				console.log("Merging finished")
+			})
+
+			console.log("About to merge files")
+
+			ffmpeg().mergeToFile("output.mp4", "/tmp")
 		}
 	)
-	/*
-
-{ format: 'vhttp-3500 - 1280x720',
-    url: 'http://viacommtvstrmfs.fplive.net/gsp.comedystor/com/dailyshow/TDS/season_20/episode_106/ds_20_106_act4_9bc1d5b1f4_1280x720_3500_h32.mp4',
-    http_headers: 
-     { 'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
-       'Accept-Language': 'en-us,en;q=0.5',
-       'Accept-Encoding': 'gzip, deflate',
-    height: 720,
-    width: 1280,
-    ext: 'mp4',
-    format_id: 'vhttp-3500' }
-
-	*/
 
 	/*
-	info.forEach(function(val, index, array) {
-		//console.log("For part: " + val.playlist_index)
-		console.log("Index: " + index)
-		//console.log(val.format_id['rtmp-400'])
-		//console.log(val.formats[0])
-		val.formats.forEach(function(each) {
-			//console.log("URL: " + each.url)
-			//console.log(each["format_id"])
-			//console.log("---")
-		})
+ffmpeg('/path/to/part1.avi')
+  .input('/path/to/part2.avi')
+  .input('/path/to/part2.avi')
+  .on('error', function(err) {
+    console.log('An error occurred: ' + err.message);
+  })
+  .on('end', function() {
+    console.log('Merging finished !');
+  })
+  .mergeToFile('/path/to/merged.avi', '/path/to/tempDir');
+  */
 
-		//array[index].forEach(function(entry) {})
+}
 
-		//val.forEach(function(val2, index, array) {
-		//	console.log("Detected format:" + val2.format_id)
-		//})
+function getFormats(format) {
+	var video = youtubedl(url, null, function(err, info) {
+		if (err) throw err;
 
-		return
+		//console.log("---")
+		//console.log(info[0].upload_date)
+		//console.log("---")
+		//console.log("For episode date:" + info[0] )
 
-		dl = youtubedl.download(url, ".", null);
-		dl.on('download', onDownloadBegin);
-		dl.on('progress', onDownloadProgress);
-		dl.on('error', onDownloadError);
-		dl.on('end', onDownloadComplete);
+		async.eachSeries(
+			info,
+			function(item, callback) {
+				var url
 
-		function onDownloadBegin(err, info) {
-			console.log("Downloading: " + info)
-		}
+				//queue[item.playlist_index] = []
 
+				console.log()
+				console.log("---")
+				console.log("Playlist item: " + item.playlist_index)
+
+				item.formats.every(function(element, index, array) {
+					if(element.format_id == format) {
+						console.log("URL for " + format + ": " + element.url)
+						return false
+					}
+					return true
+				})
+				callback()
+			},
+			function(err) {
+				console.log("Finished extracting urls")
+			}
+		)
 	})
-	*/
-
-	console.log("Episode info:")
-	console.log("Title: " + title)
-	console.log("Description: " + description)
-	console.log("Date: " + String('0' + upload_date.getDate()).slice(-2))
-	console.log("Month: " + String('0' + upload_date.getMonth()).slice(-2))
-	console.log("Year:" + upload_date.getFullYear())
-	//console.log(info)
-});
-
-console.log("---")
-console.log("Trying to download")
-
-///
-// From official example:
-// https://github.com/fent/node-youtube-dl
-/*
-var video = youtubedl(url, null, null)
-
-video.on('info', function(info) {
-  console.log('Download started');
-  console.log('filename: ' + info.filename);
-  console.log('size: ' + info.size);
-  console.log(JSON.stringify(info))
-});
-
-video.pipe(fs.createWriteStream('myvideo.mp4'));
-*/
-
-// THis works:
-
-var video = youtubedl(url, null, null)
-
-/*
-var video = youtubedl(url, null, function(err, info) {
-	if (err) throw err;
-
-	console.log("Downloading...")
-
-	var title = info[0].playlist_title
-	var description = info[0].description
-})
-*/
-
-// Another attempt:
-var size = 0;
-video.on('info', function(info) {
-	size = info.size;
-	console.log('Download started');
-	console.log('filename: ' + info._filename);
-	console.log('size: ' + info.size);
-
-	var output = info._filename
-	console.log(output)
-	video.pipe(fs.createWriteStream(output));
-});
-
-var pos = 0;
-video.on('data', function(data) {
-	pos += data.length;
-	// `size` should not be 0 here.
-	if (size) {
-		var percent = (pos / size * 100).toFixed(2);
-		process.stdout.cursorTo(0);
-		process.stdout.clearLine(1);
-		process.stdout.write(percent + '%');
-	}
-});
-
-video.on('end', function(data) {
-	console.log("Download completed")
-});
-
-return
-
-// Perhaps... just specify the format in the options?
-// There's not reason to dwell on this
-
-var size = 0;
-video.on('info', function(info) {
-	size = info.size;
-	console.log('Download started');
-	console.log('filename: ' + info._filename);
-	console.log('size: ' + info.size);
-
-	var output = info._filename
-	console.log(output)
-	video.pipe(fs.createWriteStream(output));
-});
-
-var pos = 0;
-video.on('data', function(data) {
-	pos += data.length;
-	// `size` should not be 0 here.
-	if (size) {
-		var percent = (pos / size * 100).toFixed(2);
-		process.stdout.cursorTo(0);
-		process.stdout.clearLine(1);
-		process.stdout.write(percent + '%');
-	}
-});
-
-video.on('end', function(data) {
-	console.log("Download completed")
-});
-
-///
-
-//dl = youtubedl.download(url, ".", []]);
-
-//dl.on('download', function(err, data) {
-//	console.log(data)
-//})
-/*
-dl.on('download', onDownloadBegin);
-dl.on('progress', onDownloadProgress);
-dl.on('error', onDownloadError);
-dl.on('end', onDownloadComplete);
-*/
+}
