@@ -170,3 +170,10 @@ Storing some of my notes in other files.
 
  http://thedailyshow.cc.com/episodes/l77wjf/june-1--2015---stanley-mcchrystal
 */
+
+
+Some git stuff:
+https://help.github.com/articles/importing-your-project-to-github/
+https://help.github.com/articles/adding-a-remote/
+https://help.github.com/articles/importing-a-git-repository-using-the-command-line/
+

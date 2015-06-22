@@ -77,8 +77,8 @@ function makeNatoString(dateString) {
 	return slicedString
 }
 
-var format = "vhttp-200"
-//var format = "vhttp-3500"
+//var format = "vhttp-200"
+var format = "vhttp-3500"
 
 //getFormats(format)
 
