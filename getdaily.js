@@ -6,16 +6,13 @@ var fs = require('fs')
 var sys = require('sys')
 var exec = require('child_process').exec;
 
-var format = "vhttp-200"
-//var format = "vhttp-3500"
+//var format = "vhttp-200"
+var format = "vhttp-3500"
 
 var url
 
 // Download queue
 var queue = []
-
-
-console.log(JSON.stringify(process.argv))
 
 if(process.argv.length < 3) {
 	console.log("Usage: ")
@@ -78,6 +75,15 @@ function getTargetFilename(info) {
 	var targetFilename = makeNatoString(getUploadDate(info)) + "_thedailyshow_" + getGuestName(info) + "." + info[0].ext
 
 	return targetFilename
+}
+
+function deleteActs(info) {
+	for(var i = 1; i <= 4; i++) {
+		console.log("Deleting ")
+		console.log(info[0].upload_date + "_" + i + "." + info[0].ext)
+
+		fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
+	}
 }
 
 var video = youtubedl(url, null, function(err, info) {
@@ -146,101 +152,56 @@ var video = youtubedl(url, null, function(err, info) {
 			console.log()
 			console.log("Finished extracting urls")
 
-			concatVideo(info)
+
+			if(fs.existsSync(targetFilename)) {
+				console.log(targetFilename + " exists, so not overwriting")
+				deleteActs(info)
+				process.exit()
+				//return
+			}
+
+			var uploadDate = getUploadDate(info)
+			var targetFilename = getTargetFilename(info)
+
+			if(fs.existsSync(targetFilename)) {
+				console.log(targetFilename + " already exists, existing")
+				process.exit()
+			}
+
+			var execString = "for f in ./" + uploadDate + '_*.' + info[0].ext + "; do echo \"file '$PWD/$f'\"; done "
+
+
+			var ffmpegString = 
+				"| " + "ffmpeg " +	// Pipe and executable name
+				"-f concat " +		// Format
+				"-i - " +			// Input file name
+				"-c copy "	+		// Codec
+				
+									// Metadata
+				//' -metadata title="' + info[0].playlist_title + '"' +
+				' -metadata title="The Daily Show With Jon Stewart"' +
+				' -metadata description="' + addSlashes(info[0].description) + '"' +
+				' -metadata synopsis="' + addSlashes(info[0].description) + '"' +
+				' -metadata year="' + info[0].upload_date.slice(0, 4) + '"' + // TODO use date object here, that's betterer
+				' -metadata date="' + info[0].upload_date.slice(0, 4) + '"' +
+				' -metadata show="The Daily Show With Jon Stewart"' +
+				' -metadata copyright="' + "Comedy Central" + '"' +
+				' -metadata comment="' + "downloaded with getdaily.js" + '"' +
+				' -metadata genre="' + "Comedy" + '" ' + targetFilename
+
+			execString = execString + ffmpegString
+
+			exec(execString, function (error, stdout, stderr) {
+				//console.log('stdout: ' + stdout)
+				//console.log('stderr: ' + stderr)
+				if (error !== null) {
+					console.log('exec error: ' + error)
+				} else {
+					console.log("Finished without error, so now I can clean up the leftovers")
+					console.log(info.length)
+					deleteActs(info)
+				}
+			})
 		}
 	)
 })
-
-function concatVideo(info) {
-
-	if(fs.existsSync(targetFilename)) {
-		console.log(targetFilename + " exists, so not overwriting")
-		return
-	}
-
-	/*
-  	var guestName = info[0].playlist_title.split(" - ")[1]
-  	if(guestName == null) {
-  		console.err("unable to parse guest name!")
-  		process.exit(1)
-  	}
-
-
-  	guestName = guestName.replace(new RegExp(' ', 'g'), '-')
-
-  	guestName = guestName.toLowerCase()
-  	*/
-
-  	//guestName = guestName.replace(" ", "-")
-  	//guestName = guestName.replace(" ", "-")
-
-  	//guestName = guestName.replace(new RegExp(' ', 'g'), '')
-
-//var find = 'abc';
-//var re = new RegExp(find, 'g');
-
-//str = str.replace(re, '');
-
-	
-	//var targetFilename = makeNatoString(getUploadDate(info)) + "_thedailyshow_" + getGuestName(info) + "." + info[0].ext
-
-	var uploadDate = getUploadDate(info)
-	var targetFilename = getTargetFilename(info)
-
-	//console.log("Checking for the existence of " + targetFilename)
-
-	if(fs.existsSync(targetFilename)) {
-		console.log(targetFilename + " already exists, existing")
-		process.exit()
-	}
-
-	var execString = "for f in ./" + uploadDate + '_*.' + info[0].ext + "; do echo \"file '$PWD/$f'\"; done "
-
-
-	var ffmpegString = 
-		"| " + "ffmpeg " +	// Pipe and executable name
-		"-f concat " +		// Format
-		"-i - " +			// Input file name
-		"-c copy "	+		// Codec
-		
-							// Metadata
-		//' -metadata title="' + info[0].playlist_title + '"' +
-		' -metadata title="The Daily Show With Jon Stewart"' +
-		' -metadata description="' + addSlashes(info[0].description) + '"' +
-		' -metadata synopsis="' + addSlashes(info[0].description) + '"' +
-		' -metadata year="' + info[0].upload_date.slice(0, 4) + '"' +
-		' -metadata date="' + info[0].upload_date.slice(0, 4) + '"' +
-		' -metadata show="The Daily Show With Jon Stewart"' +
-		' -metadata copyright="' + "Comedy Central" + '"' +
-		' -metadata comment="' + "downloaded with getdaily.js" + '"' +
-		' -metadata genre="' + "Comedy" + '" ' + targetFilename
-
-	execString = execString + ffmpegString
-
-	// Strip out spaces...
-
-	//console.log("execstring: " + execString)
-
-	
-
-
-	//process.exit()
-
-	exec(execString, function (error, stdout, stderr) {
-	  //console.log('stdout: ' + stdout)
-	  //console.log('stderr: ' + stderr)
-	  if (error !== null) {
-	    console.log('exec error: ' + error)
-	  } else {
-	  	console.log("Finished without error, so now I can clean up the leftovers")
-	  	console.log(info.length)
-	  	for(var i = 1; i <= 4; i++) {
-	  		console.log("Deleting ")
-	  		console.log(info[0].upload_date + "_" + i + "." + info[0].ext)
-
-	  		//fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
-	  	}
-	  }
-	})
-
-}
