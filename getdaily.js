@@ -44,9 +44,13 @@ if(process.argv.length < 2) {
 	console.log("Usage: ")
 	console.log("getdaily.js <url>")
 	process.exit()
+} else {
+	//console.log("process.argv.length: " + process.argv.length)
 }
+
 url = process.argv[2]
 
+console.log("Proceding with url: " + url)
 
 function addSlashes(string) {
     return string.replace(/\\/g, '\\\\').
@@ -173,11 +177,23 @@ function concatVideo(info) {
   		console.err("unable to parse guest name!")
   		process.exit(1)
   	}
-  	guestName = guestName.replace(" ", "-")
+
+
+  	guestName = guestName.replace(new RegExp(' ', 'g'), '-')
+
+  	//guestName = guestName.replace(" ", "-")
+  	//guestName = guestName.replace(" ", "-")
+
+  	//guestName = guestName.replace(new RegExp(' ', 'g'), '')
+
+//var find = 'abc';
+//var re = new RegExp(find, 'g');
+
+//str = str.replace(re, '');
+
 
 	var uploadDate = info[0].upload_date
 	var targetFilename = makeNatoString(uploadDate) + "_thedailyshow_" + guestName.toLowerCase() + "." + info[0].ext
-
 	var execString = "for f in ./" + uploadDate + '_*.' + info[0].ext + "; do echo \"file '$PWD/$f'\"; done "
 
 	var ffmpegString = 
@@ -198,7 +214,16 @@ function concatVideo(info) {
 		' -metadata comment="' + "downloaded with getdaily.js" + '"' +
 		' -metadata genre="' + "Comedy" + '" ' + targetFilename
 
-	execString = execString + ffmpegString 
+	execString = execString + ffmpegString
+
+	// Strip out spaces...
+
+	//console.log("execstring: " + execString)
+
+	
+
+
+	//process.exit()
 
 	exec(execString, function (error, stdout, stderr) {
 	  //console.log('stdout: ' + stdout)
