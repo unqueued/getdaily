@@ -81,8 +81,8 @@ function makeNatoString(dateString) {
 	return slicedString
 }
 
-//var format = "vhttp-200"
-var format = "vhttp-3500"
+var format = "vhttp-200"
+//var format = "vhttp-3500"
 
 //getFormats(format)
 
@@ -194,7 +194,16 @@ function concatVideo(info) {
 
 	var uploadDate = info[0].upload_date
 	var targetFilename = makeNatoString(uploadDate) + "_thedailyshow_" + guestName.toLowerCase() + "." + info[0].ext
+	
+	console.log("Checking for the existence of " + targetFilename)
+
+	if(fs.existsSync(targetFilename)) {
+		console.log(targetFilename + " already exists, existing")
+		process.exit()
+	}
+
 	var execString = "for f in ./" + uploadDate + '_*.' + info[0].ext + "; do echo \"file '$PWD/$f'\"; done "
+
 
 	var ffmpegString = 
 		"| " + "ffmpeg " +	// Pipe and executable name
@@ -237,7 +246,7 @@ function concatVideo(info) {
 	  		console.log("Deleting ")
 	  		console.log(info[0].upload_date + "_" + i + "." + info[0].ext)
 
-	  		fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
+	  		//fs.unlink(info[0].upload_date + "_" + i + "." + info[0].ext, "")
 	  	}
 	  }
 	})
