@@ -177,3 +177,20 @@ https://help.github.com/articles/importing-your-project-to-github/
 https://help.github.com/articles/adding-a-remote/
 https://help.github.com/articles/importing-a-git-repository-using-the-command-line/
 
+---
+Formats:
+rtmp-1300
+rtmp-250
+rtmp-450
+rtmp-800
+rtmp-1700
+rtmp-2200
+rtmp-3500
+vhttp-1300
+vhttp-250
+vhttp-450
+vhttp-800
+vhttp-1700
+vhttp-2200
+vhttp-3500
+
