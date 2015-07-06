@@ -1,4 +1,10 @@
 
+2015-07-06
+
+This is how someone else decided to do it.
+https://gist.github.com/stefanschmidt/923607
+
+
 
 using exec() has unpredictable results
 
