@@ -1,3 +1,9 @@
+2015-07-07
+
+
+git push --mirror root@derogatory.ca:/root/getdaily
+That should push a bare repo
+
 
 2015-07-06
 
