@@ -1,5 +1,10 @@
 2015-07-07
 
+This looks promising:
+http://stackoverflow.com/questions/67699/clone-all-remote-branches-with-git
+
+---
+
 One issue, is that only the master branch seems to have been cloned.
 I don't know if that's because I only pulled it from the bare repo, or if
 the bare repo never got all of the branches to begin with.
