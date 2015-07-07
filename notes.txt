@@ -1,5 +1,6 @@
 2015-07-07
 
+This line is being added on the remote server.
 
 git push --mirror root@derogatory.ca:/root/getdaily
 That should push a bare repo
