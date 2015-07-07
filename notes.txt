@@ -1,5 +1,23 @@
 2015-07-07
 
+It worked!
+OK, here's what I did.
+
+On server:
+mkdir getdaily.git
+cd getdaiy.git
+git init --bare
+
+On client:
+git push --mirror root@derogatory.ca:/root/getdaily.git
+
+On server:
+git clone getdaily.git
+cd getdaily
+edit stuff
+commit
+push
+
 This line is being added on the remote server.
 
 git push --mirror root@derogatory.ca:/root/getdaily
