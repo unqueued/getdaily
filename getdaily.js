@@ -167,10 +167,9 @@ var video = youtubedl(url, null, function(err, info) {
 				console.log(targetFilename + " already exists, existing")
 				process.exit()
 			}
-
+			
 			var execString = "for f in ./" + uploadDate + '_*.' + info[0].ext + "; do echo \"file '$PWD/$f'\"; done "
-
-
+			
 			var ffmpegString = 
 				"| " + "ffmpeg " +	// Pipe and executable name
 				"-f concat " +		// Format
@@ -190,7 +189,7 @@ var video = youtubedl(url, null, function(err, info) {
 				' -metadata genre="' + "Comedy" + '" ' + targetFilename
 
 			execString = execString + ffmpegString
-
+			
 			exec(execString, function (error, stdout, stderr) {
 				//console.log('stdout: ' + stdout)
 				//console.log('stderr: ' + stderr)
