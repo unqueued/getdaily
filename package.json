@@ -1,0 +1,13 @@
+{
+  "name": "getdaily",
+  "version": "0.1.0",
+  "description": "A script to download episodes of The Daily Show from Comedy Central and encode them for use on an iOS device",
+  "main": "getdaily.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+  }
+}
